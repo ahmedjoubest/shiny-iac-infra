@@ -46,7 +46,6 @@ resource "aws_security_group" "ecs_security_group" {
 # 4. IAM Role for ECS Task Execution
 # This IAM role allows ECS tasks to pull images from ECR and log to CloudWatch. 
 # It is configured to be environment-specific, using the `var.env` variable.
-
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.env}-ecsTaskExecutionRole"  # Environment-specific name for easier management (e.g., dev-ecsTaskExecutionRole)
 
@@ -116,12 +115,12 @@ resource "aws_ecs_service" "shiny_fargate_service" {
     assign_public_ip = true                                   # Assigns a public IP for access over the internet
   }
 
-  # Optional load balancer configuration can go here if using one
-  # load_balancer {
-  #   target_group_arn = aws_lb_target_group.example.arn
-  #   container_name   = "shiny-container"
-  #   container_port   = var.container_port
-  # }
+  # Associate the ECS service with the ALB target group
+  load_balancer {
+    target_group_arn = aws_lb_target_group.shiny_lb_target_group.arn  # Reference to the target group
+    container_name   = "shiny-container"                           # Name of the container in the task definition
+    container_port   = var.container_port                          # Container port (e.g., 3838)
+  }
 
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_policy]  # Ensures the role is attached before service creation
 }
