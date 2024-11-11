@@ -15,22 +15,20 @@ resource "aws_ecs_cluster" "shiny_cluster" {
 # 3. Define a security group to control access to the ECS service
 resource "aws_security_group" "ecs_security_group" {
   name        = "${var.env}-ecs-shiny-security-group"
-  description = "Allow inbound traffic to ECS service for R Shiny app"
-  vpc_id      = var.vpc_id  # Use the VPC ID from variables.tf
+  description = "Allow inbound traffic to ECS service only from ALB"
+  vpc_id      = var.vpc_id
 
-  # Inbound rule to allow HTTP access to the specified app port (e.g., 3838 for Shiny)
   ingress {
-    from_port   = var.container_port       # App port (3838 by default)
-    to_port     = var.container_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]      # Open to all IPs; adjust for production security
+    from_port       = var.container_port
+    to_port         = var.container_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_security_group.id]
   }
-  
-  # Outbound rule to allow all outgoing traffic (e.g., internet access)
+
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"               # all protocols
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
