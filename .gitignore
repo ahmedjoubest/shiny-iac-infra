@@ -7,3 +7,7 @@ jonah.portal.iac.Rproj
 usefel TF commands.txt
 README.html
 TODO.txt
+Terraform/.terraform.lock.hcl
+Terraform/.terraform/
+Terraform/terraform.tfstate
+Terraform/terraform.tfstate.backup
