@@ -37,5 +37,5 @@ variable "env" {
 variable "domain_name" {
   description = "Domain name for the SSL certificate"
   type        = string
-  default     = "jonah-sandbox.applitics.com"
+  default     = "jonah-sandbox.applitics.fr"
 }
