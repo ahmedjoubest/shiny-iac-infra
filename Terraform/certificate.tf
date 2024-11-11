@@ -9,8 +9,3 @@ resource "aws_acm_certificate" "alb_ssl_cert" {
     Environment = var.env
   }
 }
-
-# Output the certificate ARN for reference
-output "ssl_certificate_arn" {
-  value = aws_acm_certificate.alb_ssl_cert.arn
-}
