@@ -32,3 +32,10 @@ variable "env" {
   type        = string
   default     = "dev"
 }
+
+# Domain name for the SSL certificate
+variable "domain_name" {
+  description = "Domain name for the SSL certificate"
+  type        = string
+  default     = "jonah-sandbox.ahmedjou.com"
+}
