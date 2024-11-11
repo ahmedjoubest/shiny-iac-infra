@@ -26,6 +26,14 @@ resource "aws_security_group" "ecs_security_group" {
     cidr_blocks = ["0.0.0.0/0"]      # Open to all IPs; adjust for production security
   }
 
+  # Inbound rule to allow HTTPS access on port 443 for the ALB
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]      # Open to all IPs; adjust for production security
+  }
+  
   # Outbound rule to allow all outgoing traffic (e.g., internet access)
   egress {
     from_port   = 0
