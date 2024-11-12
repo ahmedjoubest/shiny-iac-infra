@@ -1,5 +1,7 @@
 # Jonah IaC Shiny Deployment
 
+## Deployment and Environment Setup
+
 ### I. Terraform Deployment Workflow
 
 In this setup, images are pushed locally without a CI/CD pipeline, so deployment with Terraform requires three steps:
@@ -67,4 +69,24 @@ aws ec2 describe-subnets --filters "Name=vpc-id,Values=<vpc-id>" --region <regio
 rephrase the last line
 Please note that the Dockerfile is very simple and may need to be updated for production use. For example: [package management with `renv`](https://rstudio.github.io/renv/articles/docker.html), adding environment variables, setting up a non-root user, and other security best practices.
 - **CI/CD Pipeline**: While it may seem overkill, setting up a CI/CD pipeline to automate the build and deployment process is recommended.
+
+## Infrastructure Components and Configuration
+
+### AWS Resources and Security Details
+
+- The architecture leverages an internet-facing ALB with SSL termination to securely route incoming HTTPS traffic to an ECS Fargate-based service that hosts the Shiny app as a containerized service within a designated ECS cluster.
+
+- For security, the ALB has a dedicated security group open to the internet on port 443, while the ECS service security group restricts access to traffic solely from the ALB, ensuring controlled and secure access.
+
+- An SSL certificate is provisioned in ACM with DNS validation to secure the ALB and enable HTTPS traffic to the specified domain, including support for the `www` subdomain.
+
+- CloudWatch is configured for centralized log management, enabling efficient logging and monitoring of the Shiny app.
+
+
+
+
+
+
+
+
 
