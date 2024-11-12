@@ -22,7 +22,7 @@ resource "aws_security_group" "ecs_security_group" {
     from_port       = var.container_port
     to_port         = var.container_port
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb_security_group.id]
+    security_groups = [aws_security_group.alb_security_group.id] # Allow traffic from ALB only
   }
 
   egress {
