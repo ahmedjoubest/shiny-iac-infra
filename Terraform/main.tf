@@ -31,6 +31,10 @@ resource "aws_security_group" "ecs_security_group" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
+  tags = {
+    Name = "${var.env}-ecs-shiny-security-group"
+  }
 }
 
 # 4. IAM Role for ECS Task Execution
