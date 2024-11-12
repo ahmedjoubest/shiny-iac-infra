@@ -6,7 +6,7 @@ resource "aws_lb" "shiny_alb" {
   security_groups    = [aws_security_group.alb_security_group.id]  # Attach security group for traffic control
   subnets            = var.subnets             # Subnets in which to deploy the ALB
 
-  enable_deletion_protection = false           # Disable deletion protection; adjust if needed for production
+  enable_deletion_protection = false           # For production environments, consider setting this to true to avoid accidental deletion
 }
 
 # 2. ALB Security Group
