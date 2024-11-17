@@ -106,7 +106,7 @@ resource "aws_ecs_service" "shiny_fargate_service" {
   network_configuration {
     subnets         = var.subnets                             # Subnets from variables.tf
     security_groups = [aws_security_group.ecs_security_group.id]  # Reference to the security group
-    assign_public_ip = false                                   # if we want to apply = false, we should use private subnets
+    assign_public_ip = true                                   # if we want to apply = false, we should use private subnets
   }
 
   # Associate the ECS service with the ALB target group
