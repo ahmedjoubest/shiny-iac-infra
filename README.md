@@ -107,6 +107,7 @@ These parameters can be set as environment variables, **in which case it would r
    - Missing data causes alarms to fail - Data could be missing on static traffic, since the DynamoDB table is only updated on user connection/disconnection.
    - Alarms could not trigger scaling actions without new data points - where `treat_missing_data  = "ignore"` is not enough.
 3. **Refinement**: Adjust scaling policies based on observed performance.
+4. **Sessions Sticking**: a careful consideration should be given to session sticking. This is important to ensure that users are not disconnected when the scaling action is triggered. This can be achieved by using the `stickiness` feature of the ALB.
 
 ### Simpler Alternative
 
