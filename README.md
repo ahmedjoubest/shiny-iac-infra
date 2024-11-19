@@ -82,6 +82,35 @@ Please note that the Dockerfile is very simple and may need to be updated for pr
 
 - CloudWatch is configured for centralized log management, enabling efficient logging and monitoring of the Shiny app.
 
+## Autoscaling Overview
+
+### Current Approach
+
+The infrastructure dynamically scales based on active sessions metrics. A DynamoDB table, updated via the `update_active_sessions_per_task()` function during user connection and disconnection, tracks global active session counts and number of tasks running. This data feeds the custom `SessionsPerTask` metric in CloudWatch, monitored by 2 alarms, each triggering a scaling action (Based on the [Step Scaling policy](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-simple-step.html)):
+
+- **Scale Out**: Adds tasks when session load exceeds the threshold.
+- **Scale In**: Reduces tasks during low activity, maintaining the minimum task count.
+
+Current parameters:
+
+- Minimum and maximum tasks: 1 and 5 
+- Scale thresholds: 3 users per task (scale in) and 15 users per task (scale out)
+
+These parameters can be set as environment variables, **in which case it would require alignment between R** (the `update_active_sessions_per_task()` function) **and Terraform** configurations.
+
+**Limitations of AWS Native Metrics**: Metrics like `ActiveConnectionCount` and `ActiveSessionCount` from the ELB were tested but found unreliable as they include connections to both the load balancer and targets. (Ref: [AWS Documentation](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html)).
+
+### Next Steps for Autoscaling
+
+1. **Metric Monitoring**: Simulate or monitor metrics in production to determine the most relevant for scaling policies. I also implemented CloudWatch Alarms for CPU usage and memory (without autoscaling actions) for this.
+2. **Regular Metric Updates required**: If we go with the number of active sessions, then **we should Implement an AWS Lambda function** to update `SessionsPerTask` in CloudWatch at 1-2 minutes intervals. This resolves issues where:
+   - Missing data causes alarms to fail - Data could be missing on static traffic, since the DynamoDB table is only updated on user connection/disconnection.
+   - Alarms could not trigger scaling actions without new data points - where `treat_missing_data  = "ignore"` is not enough.
+3. **Refinement**: Adjust scaling policies based on observed performance.
+
+### Simpler Alternative
+
+A **target tracking scaling policy** based on CPU utilization (or memory) offers a simpler and effective approach for many use cases. Using CPU metrics for scaling reduces complexity while ensuring robust performance. (Ref: [AWS Target Tracking Documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html)).
 
 
 
