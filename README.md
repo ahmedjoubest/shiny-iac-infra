@@ -76,6 +76,8 @@ Please note that the Dockerfile is very simple and may need to be updated for pr
 
 - The architecture leverages an internet-facing ALB with SSL termination to securely route incoming HTTPS traffic to an ECS Fargate-based service that hosts the Shiny app as a containerized service within a designated ECS cluster.
 
+- The ALB is configured with stickiness to ensure that all requests from a user during their session are routed to the same server. This is achieved using **ALB-generated cookies**.
+
 - For security, the ALB has a dedicated security group open to the internet on port 443, while the ECS service security group restricts access to traffic solely from the ALB, ensuring controlled and secure access.
 
 - An SSL certificate is provisioned in ACM with DNS validation to secure the ALB and enable HTTPS traffic to the specified domain, including support for the `www` subdomain.

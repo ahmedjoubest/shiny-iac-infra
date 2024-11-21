@@ -68,4 +68,11 @@ resource "aws_lb_target_group" "shiny_lb_target_group" {
     unhealthy_threshold = 2                    # Number of failures to mark as unhealthy
     matcher             = "200"                # Expected HTTP status code for a healthy response
   }
+  
+  # Stickiness configuration
+  stickiness {
+    enabled          = true                     # Enable stickiness
+    type             = "lb_cookie"              # Use ALB-generated cookies for stickiness
+    cookie_duration  = 86400                    # Duration (in seconds) for cookie validity - 1 Day
+  }
 }
