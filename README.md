@@ -126,6 +126,10 @@ These parameters can be set as environment variables, **in which case it would r
 
 **Limitations of AWS Native Metrics**: Metrics like `ActiveConnectionCount` and `ActiveSessionCount` from the ELB were tested but found unreliable as they include connections to both the load balancer and targets. (Ref: [AWS Documentation](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html)).
 
+### Deregistration Delay in ALB
+
+A 1-hour deregistration delay is configured for the shiny target group to allow in-flight requests to complete before the target is fully removed during scaling in actions.
+
 ### Next Steps for Autoscaling
 
 1. **Metric Monitoring**: Simulate or monitor metrics in production to determine the most relevant for scaling policies. I also implemented CloudWatch Alarms for CPU usage and memory (without autoscaling actions) for this.

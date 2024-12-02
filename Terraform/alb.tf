@@ -77,7 +77,9 @@ resource "aws_lb_target_group" "shiny_lb_target_group" {
   protocol    = "HTTP"                         # Set protocol to HTTP; SSL termination handled by ALB
   vpc_id      = var.vpc_id                     # Use the specified VPC for target group
   target_type = "ip"                           # Required target type for Fargate (uses IPs directly)
-
+  
+  deregistration_delay = 3600  # The number of seconds to wait before considering a target as fully deregistered
+  
   # Health check configuration for ECS tasks
   health_check {
     path                = "/"                  # Health check endpoint (adjust if needed)
