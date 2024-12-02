@@ -25,6 +25,14 @@ resource "aws_security_group" "ecs_security_group" {
     security_groups = [aws_security_group.alb_security_group.id] # Allow traffic from ALB only
   }
 
+  # Add rule to allow traffic on port 6030 (logout server)
+  ingress {
+    from_port   = 6030
+    to_port     = 6030
+    protocol    = "tcp"
+    security_groups = [aws_security_group.alb_security_group.id] # Allow traffic from ALB only
+  }
+  
   egress {
     from_port   = 0
     to_port     = 0

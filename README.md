@@ -6,9 +6,10 @@
 
 In this setup, images are pushed locally without a CI/CD pipeline, so deployment with Terraform requires three steps:
 
-1. **Apply Targeted Resources:** Create the ECR repository to make it available for image storage:
+1. **Apply Targeted Resources:** Create the ECR repository to make it available for image storage (note: same goes for the `logout_server` repository). Run the following commands:
    ```bash
    terraform apply -target=aws_ecr_repository.shiny_repository
+   terraform apply -target=aws_ecr_repository.logout_server
    ```
 
 2. **Push the Image:** Manually push the Docker image to ECR (refer to Docker commands in the next sections).
@@ -77,12 +78,35 @@ Please note that the Dockerfile is very simple and may need to be updated for pr
 - The architecture leverages an internet-facing ALB with SSL termination to securely route incoming HTTPS traffic to an ECS Fargate-based service that hosts the Shiny app as a containerized service within a designated ECS cluster.
 
 - The ALB is configured with stickiness to ensure that all requests from a user during their session are routed to the same server. This is achieved using **ALB-generated cookies**.
+Traffic is routed to the ECS service in the target group through a Cognito user pool authorizer, which validates the user's JWT token before allowing access to the Shiny app. Please refer to the Cognito section for more details.
 
 - For security, the ALB has a dedicated security group open to the internet on port 443, while the ECS service security group restricts access to traffic solely from the ALB, ensuring controlled and secure access.
 
 - An SSL certificate is provisioned in ACM with DNS validation to secure the ALB and enable HTTPS traffic to the specified domain, including support for the `www` subdomain.
 
 - CloudWatch is configured for centralized log management, enabling efficient logging and monitoring of the Shiny app.
+
+### Cognito User Pool
+
+#### User Authentication and Attributes
+
+An AWS Cognito User Pool is configured to manage user authentication and attributes, supporting public sign-ups, email-based login, and automatic email verification. Key components are:
+
+1. **User Pool**: Manages attributes including required fields (`email`, `given_name`, `family_name`) and optional fields (`phone_number`, `custom:role`, `custom:type`).  
+
+2. **User Pool Domain**: Provides a unique domain for hosting authentication flows.  
+
+3. **User Pool Client**:   Supports OAuth 2.0 with secure authorization code grant.  Configurable `callback_urls` (post-login redirection) and `logout_urls` (post-logout redirection) to handle user session flows effectively.
+
+#### Logout Architecture
+
+The Shiny app uses a **custom logout server** using `plumber` in `logout-plumber/` to handle user logout requests. The server/task is deployed as a separate ECS service in the same cluster, with a dedicated security group.
+A Specific ALB Rule is configured to route `/logout` requests to this security group, instead of the shiny app default security group.
+
+In the Shiny app, when the logout button is clicked:
+
+- A GET request is sent to the `/logout` endpoint, which triggers the `AWSELBAuthSessionCookie-0` and `AWSELBAuthSessionCookie-1` cookies expiration, using the `Set-Cookie` header.
+- A redirect to the Cognito logout URL is initiated, which invalidates the user's token and logs them out.
 
 ## Autoscaling Overview
 

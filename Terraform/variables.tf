@@ -39,3 +39,19 @@ variable "domain_name" {
   type        = string
   default     = "jonah-sandbox.applitics.fr"
 }
+
+# Callback URL for Cognito after login
+# Users will be redirected to this URL after successful login.
+variable "callback_url" {
+  description = "Callback URL for Cognito after login"
+  type        = string
+  default     = "https://jonah-sandbox.applitics.fr/oauth2/idpresponse"  # Replace or customize as needed
+}
+
+# Logout URL for Cognito after logout
+# Users will be redirected to this URL after logging out.
+variable "logout_url" {
+  description = "Logout URL for Cognito after logout"
+  type        = string
+  default     = "https://jonah-sandbox.applitics.fr"  # Replace or customize as needed
+}

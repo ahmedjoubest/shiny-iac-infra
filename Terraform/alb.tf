@@ -7,6 +7,13 @@ resource "aws_lb" "shiny_alb" {
   subnets            = var.subnets             # Subnets in which to deploy the ALB
 
   enable_deletion_protection = false           # For production environments, consider setting this to true to avoid accidental deletion
+  
+  # Enable logging to the S3 bucket # TODO: fix security issue with bucket policy
+  # access_logs {
+  #   enabled = true
+  #   bucket  = aws_s3_bucket.alb_logs.bucket  # Reference the created S3 bucket for logs
+  #   prefix  = "alb-logs"                     # Optional: Specify a folder (prefix) in the S3 bucket
+  # }
 }
 
 # 2. ALB Security Group
@@ -36,7 +43,7 @@ resource "aws_security_group" "alb_security_group" {
   }
 }
 
-# 3. Create an ALB Listener with SSL certificate
+# 3. Create an ALB Listener with SSL certificate and Cognito authentication
 resource "aws_lb_listener" "shiny_alb_listener" {
   load_balancer_arn = aws_lb.shiny_alb.arn     # Associate listener with the ALB created above
   port              = 443                      # Use HTTPS (port 443) for secure access
@@ -44,7 +51,19 @@ resource "aws_lb_listener" "shiny_alb_listener" {
   ssl_policy        = "ELBSecurityPolicy-2016-08"  # Use a predefined secure SSL policy
   certificate_arn   = aws_acm_certificate.alb_ssl_cert.arn  # Attach the SSL certificate from ACM
 
-  # Default action: forward incoming traffic to the target group
+  # Default actions: Authenticate with Cognito, then forward to the target group
+  
+  default_action {
+    type = "authenticate-cognito"             # Add Cognito authentication
+ 
+    # Cognito authentication configuration
+    authenticate_cognito {
+      user_pool_arn       = aws_cognito_user_pool.user_pool.arn          # Reference the Cognito User Pool
+      user_pool_client_id = aws_cognito_user_pool_client.user_pool_client.id  # Reference the User Pool Client
+      user_pool_domain    = aws_cognito_user_pool_domain.auth_domain.domain   # Cognito User Pool Domain
+    }
+  }
+
   default_action {
     type             = "forward"                # Forward traffic to target group
     target_group_arn = aws_lb_target_group.shiny_lb_target_group.arn  # Target group to forward to
@@ -73,6 +92,6 @@ resource "aws_lb_target_group" "shiny_lb_target_group" {
   stickiness {
     enabled          = true                     # Enable stickiness
     type             = "lb_cookie"              # Use ALB-generated cookies for stickiness
-    cookie_duration  = 86400                    # Duration (in seconds) for cookie validity - 1 Day
+    cookie_duration  = 20                    # Duration (in seconds) for cookie validity - 1 Day
   }
 }
