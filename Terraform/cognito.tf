@@ -218,7 +218,7 @@ resource "aws_lb_target_group" "logout_lb_target_group" {
 
  # Health check configuration for ECS tasks
  health_check {
-   path                = "/"                  # Health check endpoint (adjust if needed)
+   path                = "/logout"                  # Health check endpoint (adjust if needed)
    interval            = 30                   # Health check interval in seconds
    timeout             = 5                    # Health check timeout in seconds
    healthy_threshold   = 2                    # Number of successful checks to mark as healthy
